@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='pyhulu',
-    version='0.1.0',
+    version='1.0.0',
     description='Python library for interacting with the E2E encrypted Hulu API',
     url='https://github.com/truedread/pyhulu',
     author='truedread',
