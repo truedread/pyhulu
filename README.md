@@ -27,12 +27,31 @@ client.load_playlist(video_id)
 
 This method returns a dict of the playlist response, which contains stream and license URLs.
 
+# Device Codes and Keys
+
+### PC
+- Device code: `159`
+- Device key (hex): `6ebfc84f3c304217b20fd9a66cb5957f`
+
+# Example Code
+
+```python
+import pyhulu
+from http.cookiejar import MozillaCookieJar
+
+cj = MozillaCookieJar('cookies.txt')
+cj.load()
+
+client = pyhulu.HuluClient('159', bytes.fromhex('6ebfc84f3c304217b20fd9a66cb5957f'), cj)
+print(client.load_playlist(61085964))
+```
+
 # Installation
 
-To install, clone the repository and run `python setup.py install`.
+To install, either clone the repository and run `python setup.py install` or run `pip install pyhulu`.
 
 # To-Do
 
-- [ ] Add to PyPI
 - [ ] Add unit tests
+- [x] Add to PyPI
 - [x] Add documentation
