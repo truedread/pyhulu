@@ -25,9 +25,10 @@ class HuluClient(object):
     Main class for Hulu API requests
     """
 
-    def __init__(self, device_code, device_key):
+    def __init__(self, device_code, device_key, cookies):
         self.logger = logging.getLogger(__name__)
         self.device = Device(device_code, device_key)
+        self.cookies = cookies
 
         self.session_key, self.server_key = self.get_session_key()
 
@@ -50,27 +51,43 @@ class HuluClient(object):
             'token': '',
             'device': self.device.device_code,
             'version': '1',
-            'device_id': '',
+            'device_id': hashlib.md5().hexdigest().upper(),
             'kv': self.server_key,
         }
 
-        resp = requests.get(url=base_url, params=params)
-
-        try:
-            ciphertext = bytes.fromhex(resp.text)
-        except ValueError:
-            self.logger.error('Error decoding response hex')
-            self.logger.error('Request:')
-            for line in json.dumps(params, indent=4).splitlines():
-                self.logger.error(line)
-
-            self.logger.error('Response:')
-            for line in resp.text.splitlines():
-                self.logger.error(line)
-
-            raise ValueError('Error decoding response hex')
+        resp = requests.get(url=base_url, params=params, cookies=self.cookies)
+        ciphertext = self.__get_ciphertext(resp.text, params)
 
         return self.decrypt_response(self.session_key, ciphertext)
+
+    def decrypt_response(self, key, ciphertext) -> dict:
+        """
+        decrypt_response()
+
+        Method to decrypt an encrypted response with provided key
+
+        @param key: Key in bytes
+        @param ciphertext: Ciphertext to decrypt in bytes
+
+        @return: Decrypted response as a dict
+        """
+
+        aes_cbc_ctx = AES.new(key, AES.MODE_CBC, iv=b'\0'*16)
+
+        try:
+            plaintext = Padding.unpad(aes_cbc_ctx.decrypt(ciphertext), 16)
+        except ValueError:
+            self.logger.error('Error decrypting response')
+            self.logger.error('Ciphertext:')
+            self.logger.error(base64.b64encode(ciphertext).decode('utf8'))
+            self.logger.error(
+                'Tried decrypting with key %s',
+                base64.b64encode(key).decode('utf8')
+            )
+
+            raise ValueError('Error decrypting response')
+
+        return json.loads(plaintext)
 
     def get_session_key(self) -> bytes:
         """
@@ -105,20 +122,7 @@ class HuluClient(object):
         }
 
         resp = requests.post(url=url, data=payload)
-
-        try:
-            ciphertext = bytes.fromhex(resp.text)
-        except ValueError:
-            self.logger.error('Error decoding response hex')
-            self.logger.error('Request:')
-            for line in json.dumps(payload, indent=4).splitlines():
-                self.logger.error(line)
-
-            self.logger.error('Response:')
-            for line in resp.text.splitlines():
-                self.logger.error(line)
-
-            raise ValueError('Error decoding response hex')
+        ciphertext = self.__get_ciphertext(resp.text, payload)
 
         config_dict = self.decrypt_response(
             self.device.device_key,
@@ -132,34 +136,22 @@ class HuluClient(object):
 
         return bytes(derived_key_array), config_dict['key_id']
 
-    def decrypt_response(self, key, ciphertext) -> dict:
-        """
-        decrypt_response()
-
-        Method to decrypt an encrypted response with provided key
-
-        @param key: Key in bytes
-        @param ciphertext: Ciphertext to decrypt in bytes
-
-        @return: Decrypted response as a dict
-        """
-
-        aes_cbc_ctx = AES.new(key, AES.MODE_CBC, iv=b'\0'*16)
-
+    def __get_ciphertext(self, text, request):
         try:
-            plaintext = Padding.unpad(aes_cbc_ctx.decrypt(ciphertext), 16)
+            ciphertext = bytes.fromhex(text)
         except ValueError:
-            self.logger.error('Error decrypting response')
-            self.logger.error('Ciphertext:')
-            self.logger.error(base64.b64encode(ciphertext).decode('utf8'))
-            self.logger.error(
-                'Tried decrypting with key %s',
-                base64.b64encode(key).decode('utf8')
-            )
+            self.logger.error('Error decoding response hex')
+            self.logger.error('Request:')
+            for line in json.dumps(request, indent=4).splitlines():
+                self.logger.error(line)
 
-            raise ValueError('Error decrypting response')
+            self.logger.error('Response:')
+            for line in text.splitlines():
+                self.logger.error(line)
 
-        return json.loads(plaintext)
+            raise ValueError('Error decoding response hex')
+
+        return ciphertext
 
     def __repr__(self):
         return '<HuluClient session_key=%s>' % base64.b64encode(
