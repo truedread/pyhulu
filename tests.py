@@ -29,7 +29,7 @@ class ClientTests(unittest.TestCase):
         Tests playlist loading
         """
 
-        playlist = self.client.load_playlist(61085964)
+        playlist = self.client.load_playlist(60873890)
         self.assertIsNotNone(playlist.get('stream_url'))
         self.assertIsNotNone(playlist.get('dash_wv_server'))
 
