@@ -23,6 +23,22 @@ class HuluClient(object):
     HuluClient class
 
     Main class for Hulu API requests
+
+    __init__:
+
+    @param device_code: Three-digit string or integer (doesn't matter)
+                        denoting the device you will make requests as
+
+    @param device_key: 16-byte AES key that corresponds to the device
+                       code you're using. This is used to decrypt the
+                       device config response.
+
+    @param cookies: Either a cookie jar object or a dict of cookie
+                    key / value pairs. This is passed to the requests library,
+                    so whatever it takes will work. Examples here:
+                    http://docs.python-requests.org/en/master/user/quickstart/#cookies
+
+    @return: HuluClient object
     """
 
     def __init__(self, device_code, device_key, cookies):
@@ -32,7 +48,7 @@ class HuluClient(object):
 
         self.session_key, self.server_key = self.get_session_key()
 
-    def load_playlist(self, video_id) -> dict:
+    def load_playlist(self, video_id):
         """
         load_playlist()
 
@@ -60,7 +76,7 @@ class HuluClient(object):
 
         return self.decrypt_response(self.session_key, ciphertext)
 
-    def decrypt_response(self, key, ciphertext) -> dict:
+    def decrypt_response(self, key, ciphertext):
         """
         decrypt_response()
 
@@ -89,7 +105,7 @@ class HuluClient(object):
 
         return json.loads(plaintext)
 
-    def get_session_key(self) -> bytes:
+    def get_session_key(self):
         """
         get_session_key()
 

@@ -24,3 +24,5 @@ matrix:
       sudo: true
 install:
   - python setup.py -q install
+script:
+  - python tests.py
