@@ -1,4 +1,5 @@
 # pyhulu
+[![Build Status](https://travis-ci.com/truedread/pyhulu.svg?branch=master)](https://travis-ci.com/truedread/pyhulu)
 [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
 Python library for interacting with the E2E encrypted Hulu API
@@ -52,6 +53,6 @@ To install, either clone the repository and run `python setup.py install` or run
 
 # To-Do
 
-- [ ] Add unit tests
+- [x] Add unit tests
 - [x] Add to PyPI
 - [x] Add documentation
