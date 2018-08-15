@@ -30,9 +30,7 @@ class ClientTests(unittest.TestCase):
         """
 
         playlist = self.client.load_playlist(60873890)
-        print(playlist)
-        self.assertIsNotNone(playlist.get('stream_url'))
-        self.assertIsNotNone(playlist.get('dash_wv_server'))
+        self.assertIsInstance(playlist, dict)
 
     def test_exception(self):
         """
