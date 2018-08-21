@@ -1,4 +1,4 @@
-"""Unit tests for pycdm"""
+"""Unit tests for pyhulu"""
 
 import unittest
 
