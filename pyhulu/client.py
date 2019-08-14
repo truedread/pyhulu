@@ -55,23 +55,23 @@ class HuluClient(object):
         Method to get a playlist containing the MPD
         and license URL for the provided video ID and return it
 
-        @param video_id: String or integer of the video ID
-                         to get a playlist for
+        @param video_id: String of the video ID to get a playlist for
 
         @return: Dict of decrypted playlist response
         """
 
-        base_url = 'https://s.hulu.com/playlist'
+        base_url = 'https://play.hulu.com/v4/playlist'
+
         params = {
-            'video_id': video_id,
-            'token': '',
-            'device': self.device.device_code,
-            'version': '1',
-            'device_id': hashlib.md5().hexdigest().upper(),
+            'device_identifier': hashlib.md5().hexdigest().upper(),
+            'deejay_device_id': int(self.device.device_code),
+            'version': 1,
+            'content_eab_id': video_id,
+            'rv': random.randrange(1E5, 1E6),
             'kv': self.server_key,
         }
 
-        resp = requests.get(url=base_url, params=params, cookies=self.cookies)
+        resp = requests.post(url=base_url, json=params, cookies=self.cookies)
         ciphertext = self.__get_ciphertext(resp.text, params)
 
         return self.decrypt_response(self.session_key, ciphertext)
