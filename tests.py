@@ -29,7 +29,7 @@ class ClientTests(unittest.TestCase):
         Tests playlist loading
         """
 
-        playlist = self.client.load_playlist(60873890)
+        playlist = self.client.load_playlist('EAB::671f8878-bdba-40bd-ae6d-f85c55cecbb4::60873890::3450586')
         self.assertIsInstance(playlist, dict)
 
     def test_exception(self):
