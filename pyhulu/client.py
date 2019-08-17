@@ -41,10 +41,11 @@ class HuluClient(object):
     @return: HuluClient object
     """
 
-    def __init__(self, device_code, device_key, cookies):
+    def __init__(self, device_code, device_key, cookies, extra_playlist_params={}):
         self.logger = logging.getLogger(__name__)
         self.device = Device(device_code, device_key)
         self.cookies = cookies
+        self.extra_playlist_params = extra_playlist_params
 
         self.session_key, self.server_key = self.get_session_key()
 
@@ -61,7 +62,6 @@ class HuluClient(object):
         """
 
         base_url = 'https://play.hulu.com/v4/playlist'
-
         params = {
             'device_identifier': hashlib.md5().hexdigest().upper(),
             'deejay_device_id': int(self.device.device_code),
@@ -70,6 +70,7 @@ class HuluClient(object):
             'rv': random.randrange(1E5, 1E6),
             'kv': self.server_key,
         }
+        params.update(self.extra_playlist_params)
 
         resp = requests.post(url=base_url, json=params, cookies=self.cookies)
         ciphertext = self.__get_ciphertext(resp.text, params)
