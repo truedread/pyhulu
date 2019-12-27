@@ -7,7 +7,7 @@ with open('README.md', 'r') as fh:
 
 setup(
     name='pyhulu',
-    version='1.1.1',
+    version='1.1.2',
     description=('Python library for interacting '
                  'with the E2E encrypted Hulu API'),
     long_description=LONG_DESCRIPTION,

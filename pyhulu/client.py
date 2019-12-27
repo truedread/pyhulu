@@ -41,10 +41,11 @@ class HuluClient(object):
     @return: HuluClient object
     """
 
-    def __init__(self, device_code, device_key, cookies, extra_playlist_params={}):
+    def __init__(self, device_code, device_key, cookies, version=1, extra_playlist_params={}):
         self.logger = logging.getLogger(__name__)
         self.device = Device(device_code, device_key)
         self.cookies = cookies
+        self.version = version
         self.extra_playlist_params = extra_playlist_params
 
         self.session_key, self.server_key = self.get_session_key()
@@ -65,7 +66,7 @@ class HuluClient(object):
         params = {
             'device_identifier': hashlib.md5().hexdigest().upper(),
             'deejay_device_id': int(self.device.device_code),
-            'version': 1,
+            'version': self.version,
             'content_eab_id': video_id,
             'rv': random.randrange(1E5, 1E6),
             'kv': self.server_key,
@@ -116,13 +117,12 @@ class HuluClient(object):
         @return: Session key in bytes
         """
 
-        version = '1'
         random_value = random.randrange(1E5, 1E6)
 
         base = '{device_key},{device},{version},{random_value}'.format(
             device_key=binascii.hexlify(self.device.device_key).decode('utf8'),
             device=self.device.device_code,
-            version=version,
+            version=self.version,
             random_value=random_value
         ).encode('utf8')
 
@@ -133,7 +133,7 @@ class HuluClient(object):
             'rv': random_value,
             'mozart_version': '1',
             'region': 'US',
-            'version': version,
+            'version': self.version,
             'device': self.device.device_code,
             'encrypted_nonce': nonce
         }
